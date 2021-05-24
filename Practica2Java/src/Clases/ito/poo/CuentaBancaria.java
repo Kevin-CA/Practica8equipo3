@@ -4,16 +4,13 @@
 package Clases.ito.poo;
 
 import java.time.LocalDate;
-// Start of user code (user defined imports)
 
-// End of user code
+import excepcion.ito.poo.NumeCuenta;
+import excepcion.ito.poo.Saldo;
 
-/**
- * Description of CuentaBancaria.
- * 
- * @author Kevin
- */
 public class CuentaBancaria implements Comparable<CuentaBancaria> {
+	
+	static CuentasdeBanco c;
 	
 	private long numCuenta = 0L;
 	private String nomCliente = "";
@@ -26,15 +23,32 @@ public class CuentaBancaria implements Comparable<CuentaBancaria> {
 		super();
 		
 	}
-	public CuentaBancaria(long numCuenta, String nomCliente, float saldo, LocalDate fechaApertura) {
+	
+	private void NumeDeCuenta(long numCuenta) throws NumeCuenta{
+		if (9999>=numCuenta)
+			throw new NumeCuenta("No puede haber un número de cuenta menor a 9999");
+	}
+	
+	private void Saldo(float saldo) throws Saldo{
+		if (saldo<5000F)
+			throw new Saldo("No se puede iniciar una cuenta con un saldo menor a 5000$");
+	}
+	
+	
+	
+	
+	public CuentaBancaria(long numCuenta, String nomCliente, float saldo, LocalDate fechaApertura)
+			throws NumeCuenta,Saldo {
 		super();
+		NumeDeCuenta(numCuenta);
 		this.numCuenta = numCuenta;
 		this.nomCliente = nomCliente;
+		Saldo(saldo);
 		Saldo = saldo;
 		this.fechaApertura = fechaApertura;
 	}
 	
-	public boolean Deposito(float Cantidad) {
+	public boolean Deposito(float Cantidad)throws Saldo {
 		boolean Deposito = false;
 		if(this.fechaApertura==null)
 			System.out.println("La cuenta no está activa");
@@ -48,7 +62,7 @@ public class CuentaBancaria implements Comparable<CuentaBancaria> {
 	}
 	
 
-	public boolean Retiro(float Cantidad) {
+	public boolean Retiro(float Cantidad)throws Saldo {
 		
 		boolean Retiro = false;
 		if(Cantidad<=this.getSaldo()) {
@@ -67,8 +81,8 @@ public class CuentaBancaria implements Comparable<CuentaBancaria> {
 		return this.numCuenta;
 	}
 
-	public void setNumCuenta(long newNumCuenta) {
-		
+	public void setNumeCuenta(long newNumCuenta)throws NumeCuenta {
+		NumeDeCuenta(newNumCuenta);
 		this.numCuenta = newNumCuenta;
 	}
 
@@ -86,7 +100,12 @@ public class CuentaBancaria implements Comparable<CuentaBancaria> {
 		return this.Saldo;
 	}
 
-	public void setSaldo(float newSaldo) {
+	public void setSaldo(float newSaldo)throws Saldo {
+		Saldo(newSaldo);
+		this.Saldo = newSaldo;
+	}
+	
+	public void setSaldoActualizado(float newSaldo) {
 		this.Saldo = newSaldo;
 	}
 

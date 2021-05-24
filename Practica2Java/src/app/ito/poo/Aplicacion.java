@@ -1,42 +1,72 @@
 package app.ito.poo;
+
+import java.awt.HeadlessException;
 import java.time.LocalDate;
 import Clases.ito.poo.CuentaBancaria;
 import Clases.ito.poo.CuentasdeBanco;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import excepcion.ito.poo.CuentaExistente;
+import excepcion.ito.poo.BorrarCuenta;
+import excepcion.ito.poo.Deposito;
+import excepcion.ito.poo.NumeCuenta;
+import excepcion.ito.poo.Retiro;
+import excepcion.ito.poo.Saldo;
 
 public class Aplicacion {
 
-static CuentasdeBanco c;
+	static CuentasdeBanco c;
+	static CuentaBancaria e;
 	
-	static void menu() {
+	
+	static void menu() throws NumeCuenta, Saldo, Retiro, Deposito, HeadlessException, CuentaExistente, BorrarCuenta {
 		inicializa();
+		final JPanel panel=new JPanel();
+		boolean error=true;
+		while(error) {
+		try {
 		boolean ciclo=true;
 		int respuesta=0;
 		while(ciclo) {
-		String opciones="Indique que desea realizar:\n 1)Agregar una nueva cuenta\n 2)Mostrar las cuentas existentes\n 3)Hacer un depósito a una cuenta existente\n "
-				+ "4)Hacer un retiro a una cuenta\n 5)Eliminar una cuenta\n 6)Consulta\n 7)Salir";
+		String opciones="Elige la opción que desees:\n 1)Agregar una cuenta\n 2)Imprimir las cuentas existentes\n 3)Hacer un depósito a una cuenta\n "
+				+ "4)Hacer un retiro a una cuenta\n 5)Dar de baja una cuenta\n 6)Hacer una consulta\n 7)Exit";
 		respuesta=Integer.parseInt(JOptionPane.showInputDialog(opciones));
 		switch(respuesta) {
-		case 1:nuevaCuenta();break;
-		case 2:cuentasExistentes();break;
-		case 3:deposito();break;
-		case 4:retiro();break;
-		case 5:eliminarCuenta();break;
+		case 1:agregarCuenta();break;
+		case 2:mostrarCuentas();break;
+		case 3:hacerDeposito();break;
+		case 4:hacerRetiro();break;
+		case 5:borrarCuenta();break;
 		case 6:consulta();break;
-		case 7:ciclo=false;break;
-		default:JOptionPane.showMessageDialog(null,"Ingrese aqui la opción deseada");
+		case 7:ciclo=false;error=false;break;
+		default:JOptionPane.showMessageDialog(null,"Ingrese una de las opciones indicadas por favor");
 		  }
+		}
+		}catch(NumeCuenta e){
+			JOptionPane.showMessageDialog(panel,e.getMessage(),"ERROR", JOptionPane.ERROR_MESSAGE);
+		}catch(Saldo e) {
+			JOptionPane.showMessageDialog(panel,e.getMessage(),"ERROR", JOptionPane.ERROR_MESSAGE);
+		}catch(Deposito e) {
+			JOptionPane.showMessageDialog(panel,e.getMessage(),"ERROR", JOptionPane.ERROR_MESSAGE);
+		}catch(Retiro e) {
+			JOptionPane.showMessageDialog(panel,e.getMessage(),"ERROR", JOptionPane.ERROR_MESSAGE);
+		}catch(CuentaExistente e) {
+			JOptionPane.showMessageDialog(panel,e.getMessage(),"ERROR", JOptionPane.ERROR_MESSAGE);
+		}catch(BorrarCuenta e) {
+			JOptionPane.showMessageDialog(panel,e.getMessage(),"ERROR", JOptionPane.ERROR_MESSAGE);
+		}
 		}
 	}
 	
-	static CuentaBancaria datosNCuenta() {
+	static CuentaBancaria capturarCuenta() throws NumeCuenta,Saldo {
 		CuentaBancaria n=new CuentaBancaria();
 		long l;String fecha,nombre;float saldo;
-		l=Long.parseLong(JOptionPane.showInputDialog("Numero de cuenta deseado:"));
-		nombre=JOptionPane.showInputDialog("Nombre del titular:");
-		saldo=Float.parseFloat(JOptionPane.showInputDialog("Saldo inicial:"));
-		fecha=JOptionPane.showInputDialog("Fecha de apertura(año-mes-día):");
-		n.setNumCuenta(l);
+		l=Long.parseLong(JOptionPane.showInputDialog("Proporciona un número de cuenta:"));
+		nombre=JOptionPane.showInputDialog("Proporciona el nombre del cliente:");
+		saldo=Float.parseFloat(JOptionPane.showInputDialog("Proporciona el saldo de la cuenta:"));
+		fecha=JOptionPane.showInputDialog("Proporciona la fecha de apertura(aaaa-mm-dd):");
+		n.setNumeCuenta(l);
 		n.setNomCliente(nombre);
 		n.setSaldo(saldo);
 		n.setFechaApertura(LocalDate.parse(fecha));
@@ -47,18 +77,21 @@ static CuentasdeBanco c;
 		c=new CuentasdeBanco();
 	}
 	
-	static void nuevaCuenta() {
+	static void agregarCuenta() throws NumeCuenta, Saldo, HeadlessException, CuentaExistente {
 		CuentaBancaria nueva;
-		nueva=datosNCuenta();
-		if(c.addItem(nueva))
-			JOptionPane.showMessageDialog(null,"Se agregó la cuenta creada :)");
+		nueva=capturarCuenta();
+		if(c.addItem(nueva)) {
+			JOptionPane.showMessageDialog(null,"Se ah agregado la cuenta con exito!!");
+			if(c.isFull())
+				c.crecerArreglo();
+		}
 		else
-			JOptionPane.showMessageDialog(null,"Esta cuenta ya existe :(");
+			JOptionPane.showMessageDialog(null,"Error:La cuenta ya existe!!");
 	}
 	
-	static void cuentasExistentes() {
+	static void mostrarCuentas() {
 		if(c.isFree())
-			JOptionPane.showMessageDialog(null,"No hay cuentas");
+			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {
 		String cuentas="";
 		for(int i=0;i<c.getSize();i++)
@@ -66,79 +99,83 @@ static CuentasdeBanco c;
 		JOptionPane.showMessageDialog(null,cuentas);
 		}
 	}
-	static void deposito() {
+	
+	static void hacerDeposito() throws Saldo, Deposito {
 		int pos=0;
 		float cantidad=0;
 		if(c.isFree())
-			JOptionPane.showMessageDialog(null,"No hay cuentas");
+			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {
 			boolean bandera=true;
 			while(bandera) {
 		    String cuentas="";
 		    for(int i=0;i<c.getSize();i++)
 			    cuentas=cuentas+"\n"+(i+1)+")"+(c.getItem(i));
-		    pos=Integer.parseInt(JOptionPane.showInputDialog("Elija a quien hará el deposito\n"+cuentas));
+		    pos=Integer.parseInt(JOptionPane.showInputDialog("A que cuenta deseas hacer un deposito?\n"+cuentas));
 		    if((c.getSize())>=pos&&pos>0) {
-		    cantidad=Float.parseFloat(JOptionPane.showInputDialog("Indique la cantidad a depositar"));
-		    c.getItem(pos-1).setSaldo(c.getItem(pos-1).getSaldo()+cantidad);
+		    cantidad=Float.parseFloat(JOptionPane.showInputDialog("Que cantidad desea depositar?"));
+		    c.Deposito(cantidad);
+		    c.getItem(pos-1).setSaldoActualizado(c.getItem(pos-1).getSaldo()+cantidad);
 		    c.getItem(pos-1).setFechaActualizacion(LocalDate.now());
-		    JOptionPane.showMessageDialog(null,"Muchas gracias por regalarme dinero :)");
+		    JOptionPane.showMessageDialog(null,"Dinero depositado exitosamente!!");
 		    bandera=false;
 		    }
 		    else
-		    	JOptionPane.showMessageDialog(null,"Esa cuenta no existe, pero si quiere me lo puede dar a mi :)");
+		    	JOptionPane.showMessageDialog(null,"Esa cuenta no existe!!");
 			}
 		}
 	}
 	
-	static void retiro() {
+	static void hacerRetiro() throws Saldo, Retiro {
 		int pos=0;
 		float cantidad=0;
 		if(c.isFree())
-			JOptionPane.showMessageDialog(null,"No hay cuentas aún");
+			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {
 			boolean bandera=true;
 			while(bandera) {
 		    String cuentas="";
 		    for(int i=0;i<c.getSize();i++)
 			    cuentas=cuentas+"\n"+(i+1)+")"+(c.getItem(i));
-		    pos=Integer.parseInt(JOptionPane.showInputDialog("Cuenta a la que deseas retirar\n"+cuentas));
+		    pos=Integer.parseInt(JOptionPane.showInputDialog("A que cuenta deseas hacer un retiro?\n"+cuentas));
 		    if((c.getSize())>=pos&&pos>0) {
-		    cantidad=Float.parseFloat(JOptionPane.showInputDialog("Indique cantidad a retirar"));
+		    cantidad=Float.parseFloat(JOptionPane.showInputDialog("Que cantidad desea retirar?"));
+		    c.Retiro(cantidad);
 		    if(!(c.getItem(pos-1).getSaldo()<cantidad)) {
-		    c.getItem(pos-1).setSaldo(c.getItem(pos-1).getSaldo()-cantidad);
+		    c.getItem(pos-1).setSaldoActualizado(c.getItem(pos-1).getSaldo()-cantidad);
 		    c.getItem(pos-1).setFechaActualizacion(LocalDate.now());
-		    JOptionPane.showMessageDialog(null,"Cuidado al salir, no le vayan a robar");
+		    JOptionPane.showMessageDialog(null,"Dinero retirado exitosamente!!");
 		    bandera=false;
 		    }
 		    else {
-		    	JOptionPane.showMessageDialog(null,"Eres demasiado pobre, no cuentas con esa cantidas :(");
+		    	JOptionPane.showMessageDialog(null,"La cantidad exede el saldo de la cuenta!!");
 		    }
 		    }
 		    else
-		    	JOptionPane.showMessageDialog(null,"No existe esa cuenta, si quieres pide un prestamo");
+		    	JOptionPane.showMessageDialog(null,"Esa cuenta no existe!!");
 			}
 		}
 	}
 	
-	static void eliminarCuenta() {
+	static void borrarCuenta() throws BorrarCuenta {
 		int pos=0;
 		if(c.isFree())
-			JOptionPane.showMessageDialog(null,"Sin cuentas aún");
+			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {
 			boolean bandera=true;
 			while(bandera) {
 		    String cuentas="";
 		    for(int i=0;i<c.getSize();i++)
 			    cuentas=cuentas+"\n"+(i+1)+")"+(c.getItem(i));
-		    pos=Integer.parseInt(JOptionPane.showInputDialog("Indique que cuenta desea eliminar\n"+cuentas));
+		    pos=Integer.parseInt(JOptionPane.showInputDialog("Cual cuenta deseas dar de baja?\n"+cuentas));
 		    if((c.getSize())>=pos&&pos>0) {
+		    	c.BorrarCuenta(c.getItem(pos-1));
 		    	c.clear(c.getItem(pos-1));
-		    	JOptionPane.showMessageDialog(null,"Esperemos que regrese con nosotros :(");
+		    	JOptionPane.showMessageDialog(null,"Cuenta dada de baja con éxito!!");
 		    	bandera=false;
 		    }	
 		    else
-		    	JOptionPane.showMessageDialog(null,"Que quiere dar de baja si esa cuenta no existe");
+		    	JOptionPane.showMessageDialog(null,"Esa cuenta no existe!!");
 		  }
 		}
 	}
@@ -147,9 +184,9 @@ static CuentasdeBanco c;
 		int respuesta=0;
 		boolean ciclo=true;
 		while(ciclo) {
-		String opciones="Indique que desea hacer y lo atenderemos :):\n 1)Total de dinero en cuentas\n 2)Promedio de las cuentas\n"
-				+ " 3)Cuentas con $10,000 o más\n "
-				+ "4)Cuentas saldo a tope\n 5)Cuentas con el minimo\n 6)Salir";
+		String opciones="Elige la consulta que desees:\n 1)Monto total de las cuentas\n 2)Monto promedio de las cuentas\n"
+				+ " 3)Cuentas con saldo superior de los $10,000\n "
+				+ "4)Cuenta/s con saldo máximo\n 5)Cuenta/s con saldo mínimo\n 6)Exit";
 		respuesta=Integer.parseInt(JOptionPane.showInputDialog(opciones));
 		switch(respuesta) {
 		case 1:montoTotal();ciclo=false;break;
@@ -158,11 +195,12 @@ static CuentasdeBanco c;
 		case 4:saldoMax();ciclo=false;break;
 		case 5:saldoMin();ciclo=false;break;
 		case 6:ciclo=false;break;
-		default:JOptionPane.showMessageDialog(null,"Ingrese aqui la opción deseada");
+		default:JOptionPane.showMessageDialog(null,"Ingrese una de las opciones indicadas por favor");
 		  }
 		}
 	}
-	public static void montoTotal() {
+	
+	static void montoTotal() {
 		if(c.isFree())
 			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {
@@ -173,7 +211,7 @@ static CuentasdeBanco c;
 		}
 	}
 	
-	public static void montoPromedio() {
+	static void montoPromedio() {
 		float montoProm=0;
 		if(c.isFree())
 			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
@@ -186,22 +224,25 @@ static CuentasdeBanco c;
 		}
 	}
 	
-	public static void mayor10mil() {
+	static void mayor10mil() {
 		if(c.isFree())
 			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {
+			int vacio=0;
 			CuentaBancaria copia[]=new CuentaBancaria[c.getSize()];
 			for(int i=0;i<c.getSize();i++)
 				if(c.getItem(i).getSaldo()>10000) 
-					copia[i]=c.getItem(i);
+					copia[i-vacio]=c.getItem(i);
+				else
+					vacio++;
 			String cuentas="";
-			for(int j=0;j<c.getSize();j++)
+			for(int j=0;j<(c.getSize()-vacio);j++)
 				cuentas=cuentas+"\n"+copia[j];
 			JOptionPane.showMessageDialog(null,"Las cuentas que tienen un saldo exedente a $10,000 son:\n"+cuentas);
 		}
 	}
 	
-	public static void saldoMax() {
+	static void saldoMax() {
 		if(c.isFree())
 			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {
@@ -224,7 +265,7 @@ static CuentasdeBanco c;
 		
 	}
 	
-	public static void saldoMin() {
+	static void saldoMin() {
 		if(c.isFree())
 			JOptionPane.showMessageDialog(null,"Todavía no hay ninguna cuenta");
 		else {

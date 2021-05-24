@@ -1,9 +1,16 @@
 package Clases.ito.poo;
 
+import excepcion.ito.poo.CuentaExistente;
+import excepcion.ito.poo.BorrarCuenta;
+import excepcion.ito.poo.Deposito;
+import excepcion.ito.poo.Retiro;
 import interfaz.ito.poo.Arreglo;
+import Clases.ito.poo.CuentaBancaria;
+
+
 public class CuentasdeBanco implements Arreglo<CuentaBancaria> {
 
-	
+	static CuentaBancaria e;
 
 	private CuentaBancaria cuentas[]=null;
 	private int ultimo=0;
@@ -15,8 +22,30 @@ public class CuentasdeBanco implements Arreglo<CuentaBancaria> {
 		this.ultimo=-1;
 	}
 	
+	public void Deposito(float deposito) throws Deposito{
+		if (deposito<500F||deposito>25000F)
+			throw new Deposito("No se puede depositar menos de 500$ o más de 25,000$");
+	}
+	public void Retiro(float retiro) throws Retiro{
+		if (!((retiro%100)==0) || retiro<100 || retiro>6000)
+			throw new Retiro("No se puede retirar más de 6000$ ni menos de 100$, y el retio debe ser divisible entre 100");
+	}
 	
-	private void crecerArreglo() {
+	public void CuentaExistente(CuentaBancaria item) throws CuentaExistente{
+		if(this.existeItem(item)) {
+			throw new CuentaExistente("La cuenta ya existe");
+		}
+	}
+	
+	public void BorrarCuenta(CuentaBancaria item) throws BorrarCuenta{
+		if(item.getSaldo()==0) {
+			throw new BorrarCuenta("Una cuenta con saldo distinto a 0 no se puede eliminar");
+		}
+	}
+	
+	
+	
+	public void crecerArreglo() {
 		CuentaBancaria copia[]=new CuentaBancaria[this.cuentas.length+INC];
 		for(int i=0;i<cuentas.length;i++)
 			copia[i]=this.cuentas[i];
@@ -26,7 +55,6 @@ public class CuentasdeBanco implements Arreglo<CuentaBancaria> {
 	@Override
 	public boolean addItem(CuentaBancaria item) {
 		boolean add=false;
-		if(!this.existeItem(item)) {
 		if(this.isFull()) 
 			crecerArreglo();
 		int j=0;
@@ -40,7 +68,7 @@ public class CuentasdeBanco implements Arreglo<CuentaBancaria> {
 				this.cuentas[j]=item;
 				this.ultimo++;
 				add=true;
-			}
+			
 		return add;
 	}
 
@@ -55,6 +83,8 @@ public class CuentasdeBanco implements Arreglo<CuentaBancaria> {
 					
 		return existe;
 	}
+	
+	
 
 	@Override
 	public CuentaBancaria getItem(int pos) {
