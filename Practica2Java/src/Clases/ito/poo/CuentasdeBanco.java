@@ -24,22 +24,22 @@ public class CuentasdeBanco implements Arreglo<CuentaBancaria> {
 	
 	public void Deposito(float deposito) throws Deposito{
 		if (deposito<500F||deposito>25000F)
-			throw new Deposito("No se puede depositar menos de 500$ o más de 25,000$");
+			throw new Deposito("No se puede depositar una cantidad tan pequeña como $500, o una tan grande como $25000");
 	}
 	public void Retiro(float retiro) throws Retiro{
 		if (!((retiro%100)==0) || retiro<100 || retiro>6000)
-			throw new Retiro("No se puede retirar más de 6000$ ni menos de 100$, y el retio debe ser divisible entre 100");
+			throw new Retiro("No se pueden retirar más de 6000$ en un solo retiro, ni tampoco 100 pesos o menos, y el retio debe ser divisible entre 100");
 	}
 	
 	public void CuentaExistente(CuentaBancaria item) throws CuentaExistente{
 		if(this.existeItem(item)) {
-			throw new CuentaExistente("La cuenta ya existe");
+			throw new CuentaExistente("Esa cuenta ya está registrada en nuestro sistema");
 		}
 	}
 	
 	public void BorrarCuenta(CuentaBancaria item) throws BorrarCuenta{
 		if(item.getSaldo()==0) {
-			throw new BorrarCuenta("Una cuenta con saldo distinto a 0 no se puede eliminar");
+			throw new BorrarCuenta("Una cuenta que tenga deudas o dinero en su cuenta no puede ser eliminada");
 		}
 	}
 	

@@ -26,12 +26,12 @@ public class CuentaBancaria implements Comparable<CuentaBancaria> {
 	
 	private void NumeDeCuenta(long numCuenta) throws NumeCuenta{
 		if (9999>=numCuenta)
-			throw new NumeCuenta("No puede haber un número de cuenta menor a 9999");
+			throw new NumeCuenta("No se puede crear una cuenta menor a 9999");
 	}
 	
 	private void Saldo(float saldo) throws Saldo{
 		if (saldo<5000F)
-			throw new Saldo("No se puede iniciar una cuenta con un saldo menor a 5000$");
+			throw new Saldo("Por estándares de la empresa, debes tener por lo menos 5000$ pesos o más para crear una cuenta");
 	}
 	
 	
@@ -51,7 +51,7 @@ public class CuentaBancaria implements Comparable<CuentaBancaria> {
 	public boolean Deposito(float Cantidad)throws Saldo {
 		boolean Deposito = false;
 		if(this.fechaApertura==null)
-			System.out.println("La cuenta no está activa");
+			System.out.println("La cuenta no se encuentra disponible");
 		else {
 			Deposito = true;
 			this.setSaldo(this.getSaldo()+Cantidad);
@@ -71,7 +71,7 @@ public class CuentaBancaria implements Comparable<CuentaBancaria> {
 			this.fechaActualizacion=LocalDate.now();
 		}
 		else
-			System.out.println("La cantidad a retirar sobrepasa el saldo");
+			System.out.println("No cuenta con saldo suficiente");
 		return Retiro;
 	}
 
